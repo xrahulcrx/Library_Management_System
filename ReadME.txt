@@ -29,3 +29,9 @@ b) Find the top three most active members based on the number of books
 borrowed.
 c) Retrieve authors whose books have been borrowed at least 10 times.
 d) Identify members who have never borrowed a book
+
+
+####################################################################################################
+
+Added SQL file with complete creation of tables and query tasks.
+Added PDF filw with screenshots of outputs.
