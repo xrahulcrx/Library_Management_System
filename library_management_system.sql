@@ -136,6 +136,15 @@ VALUES
 ('Arjun Malhotra', 'arjun.malhotra@example.com', 9988007766, 'Delhi', '2025-06-10'),
 ('Neha Kapoor', 'neha.kapoor@example.com', 9345601234, 'Bhopal', default);
 
+
+--extra member not borrowed - new entry
+insert into members (Name, Email, Phone_No, Address, Membership_Date) values
+('Vignesh Kumar', 'vignesh.kumar@example.com', 9345641234, 'Chennai', '2025-04-10'),
+('Arun Kumar', 'arun.kumar@example.com', 9375641234, 'Bangalore', '2025-04-10'),
+('Pavithra Kumari', 'pavithra.kumari@example.com', 9345121234, 'Chennai', '2025-04-10');
+
+
+
 select * from Members;
 
 
@@ -163,6 +172,26 @@ VALUES
 (11, 19, '2025-11-01', NULL),
 (12, 11, '2025-10-22', '2025-11-10'),
 (13, 18, '2025-09-01', NULL);
+
+--additional inserts
+INSERT INTO BorrowingRecords (Member_ID, Book_ID, Borrow_Date, Return_Date)
+VALUES (14, 10, '2025-10-01', NULL),
+(15, 10, '2025-09-22', '2025-10-03'),
+(16, 10, '2025-08-15', NULL),
+(17, 10, '2025-11-02', '2025-11-18'),
+(18, 6,  '2025-10-05', NULL),
+(19, 6,  '2025-11-12', NULL),
+(20, 6,  '2025-07-14', '2025-08-01'),
+(3, 2,  '2025-07-20', NULL),
+(5, 2,  '2025-08-18', '2025-09-02'),
+(8, 2,  '2025-10-21', NULL),
+(10, 2, '2025-09-10', NULL),
+(12, 2, '2025-11-20', NULL),
+(14, 5, '2025-10-12', NULL),
+(16, 5, '2025-08-02', NULL),
+(7, 1, '2025-09-05', NULL),
+(9, 1, '2025-11-10', NULL),
+(12, 1, '2025-08-25', '2025-09-05');
 
 
 select * from BorrowingRecords;
@@ -198,14 +227,14 @@ order by borrow_date;
 
 --Retrieve books by genre along with the count of available copies
 
---v1 retrieves the genre and with no of books
+--v1 retrieves the genre and with no. of books
 
 select genre, count(*) as No_of_Books, sum(available_copies) as Total_copies
 from books 
 group by genre
 order by Total_copies desc, genre;
 
---v2 one row per genre with total available copies
+--v2 one row per genre with book genre list and total available copies
 SELECT 
     genre,
     COUNT(*) AS total_books_in_genre,
@@ -249,11 +278,38 @@ order by Genres_Borrowed desc;
 --Reporting and Analytics:
 --##################################################
 
+--Calculate the total number of books borrowed per month.
 
+select date_trunc('month', borrow_date)::date as Months_start,
+		to_char(borrow_date, 'Mon YYYY') as Month_name,  count(*) as Borrow_count
+from borrowingrecords
+group by Months_start, Month_name
+order by Months_start;
 
+--Find the top three most active members based on the number of books borrowed.
 
+select m.member_id, m.name, count(*) as Borrow_count
+from members m
+join borrowingrecords br on br.member_id = m.member_id
+group by m.member_id, m.name
+order by Borrow_count desc
+limit 3;
 
+--Retrieve authors whose books have been borrowed at least 10 times.
 
+select b.author, count(*) as Borrow_count
+from borrowingrecords br
+join books b on br.book_id = b.book_id
+group by b.author
+having count(*) >= 10
+order by Borrow_count desc, b.author;
+
+--Identify members who have never borrowed a book.
+
+select m.member_id, m.name
+from members m
+left join borrowingrecords br on br.member_id = m.member_id
+where br.member_id is null;
 
 
 
