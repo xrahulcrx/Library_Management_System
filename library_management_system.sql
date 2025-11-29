@@ -84,8 +84,8 @@ check (Return_Date is null or Return_Date >= Borrow_Date);
 
 --Data entries for Books Table
 
-INSERT INTO Books (Title, Author, Genre, Year_Published, Available_Copies)
-VALUES
+insert into Books (Title, Author, Genre, Year_Published, Available_Copies)
+values
 ('To Kill a Mockingbird', 'Harper Lee', 'Fiction', 1960, 5),
 ('1984', 'George Orwell', 'Dystopian', 1949, 3),
 ('The Great Gatsby', 'F. Scott Fitzgerald', 'Classic', 1925, 4),
@@ -113,8 +113,8 @@ select * from Books;
 
 --Data entries for Members Table
 
-INSERT INTO Members (Name, Email, Phone_No, Address, Membership_Date)
-VALUES
+insert into Members (Name, Email, Phone_No, Address, Membership_Date)
+values
 ('Rahul Sharma', 'rahul.sharma1@example.com', 9876543210, 'Delhi', '2024-03-01'),
 ('Anjali Verma', 'anjali.verma@example.com', 9123456780, 'Mumbai', '2024-04-10'),
 ('John Mathew', 'john.mathew@example.com', 9988776655, 'Bangalore', '2024-02-20'),
@@ -150,8 +150,8 @@ select * from Members;
 
 --Data entries for BorrowingRecords Table
 
-INSERT INTO BorrowingRecords (Member_ID, Book_ID, Borrow_Date, Return_Date)
-VALUES
+insert into BorrowingRecords (Member_ID, Book_ID, Borrow_Date, Return_Date)
+values
 (1, 1,  '2025-08-10', NULL),
 (1, 6,  '2025-10-20', '2025-11-28'),
 (1, 7,  '2025-09-10', '2025-10-25'),
@@ -174,8 +174,8 @@ VALUES
 (13, 18, '2025-09-01', NULL);
 
 --additional inserts
-INSERT INTO BorrowingRecords (Member_ID, Book_ID, Borrow_Date, Return_Date)
-VALUES (14, 10, '2025-10-01', NULL),
+insert into BorrowingRecords (Member_ID, Book_ID, Borrow_Date, Return_Date)
+values (14, 10, '2025-10-01', NULL),
 (15, 10, '2025-09-22', '2025-10-03'),
 (16, 10, '2025-08-15', NULL),
 (17, 10, '2025-11-02', '2025-11-18'),
@@ -215,14 +215,14 @@ where br.member_id = 3 and br.return_date is null
 order by borrow_date desc;
 
 
---Find members who have overdue books (borrowed more than 30 days ago, not returned).
+-- b) Find members who have overdue books (borrowed more than 30 days ago, not returned).
 
 
 select m.member_id, m.Name, br.borrow_date, (current_date - br.borrow_date) as No_of_days
 from borrowingrecords br
 join members m on br.member_id = m.member_id
 where return_date is null and (current_date - br.borrow_date) > 30
-order by borrow_date;
+order by no_of_days desc;
 
 
 --Retrieve books by genre along with the count of available copies
@@ -235,18 +235,15 @@ group by genre
 order by Total_copies desc, genre;
 
 --v2 one row per genre with book genre list and total available copies
-SELECT 
-    genre,
-    COUNT(*) AS total_books_in_genre,
-    SUM(available_copies) AS Total_copies,
-    STRING_AGG(Title, ' | ' ORDER BY Title) AS book_titles
-FROM Books 
-GROUP BY genre
-ORDER BY Total_copies DESC, genre;
+select genre, count(*) as total_books_in_genre,
+    sum(available_copies) as Total_copies,
+    STRING_AGG(Title, ' | ' order by Title) as book_titles
+from Books 
+group by genre
+order by Total_copies desc, genre;
 
 
 --Find the most borrowed book(s) overall
-
 /*-- Returns all books with the highest borrow count (tie supported) */
 
 with borrow_stats as (
@@ -271,7 +268,6 @@ join books b on b.book_id = br.book_id
 group by m.member_id
 having count(distinct b.genre) >= 3
 order by Genres_Borrowed desc;
-
 
 
 --##################################################
@@ -310,7 +306,6 @@ select m.member_id, m.name
 from members m
 left join borrowingrecords br on br.member_id = m.member_id
 where br.member_id is null;
-
 
 
 
