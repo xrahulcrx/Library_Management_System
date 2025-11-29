@@ -28,19 +28,20 @@ create table Books (
 
 --creation of Members Tables
 /* 
-   Members_ID is auto-increment identity
+   Member_ID is auto-increment identity
    Email must be unique
    Phone_No stored as BIGINT
    Membership_Date defaults to today's date
 */
 create table Members (
-					  Members_ID int generated always as identity primary key,
+					  Member_ID int generated always as identity primary key,
 					  Name varchar(50) not null,
 					  Email varchar(50) unique not null,
 					  Phone_No bigint,
 					  Address varchar(150),
 					  Membership_Date date DEFAULT CURRENT_DATE
 );
+
 
 
 --Creation of BorrowingRecords table
@@ -61,9 +62,13 @@ create table BorrowingRecords (
 								Return_Date date,
 
 								-- Foreign Keys
-								foreign key (Member_ID) references Members(Members_ID),
+								foreign key (Member_ID) references Members(Member_ID),
 								foreign key (Book_ID) references Books(Book_ID)
 );
+
+
+
+
 
 
 --return date cannot be before borrow date
@@ -164,6 +169,87 @@ select * from BorrowingRecords;
 
 -------------------------------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------------------------------
+
+
+--##################################################
+--Information Retrieval:
+--##################################################
+
+
+-- a) Retrieve a list of books currently borrowed by a specific member.
+
+
+select br.borrow_id, b.title, b.author, br.borrow_date
+from BorrowingRecords br
+join Books b on br.book_id = b.book_id
+where br.member_id = 3 and br.return_date is null
+order by borrow_date desc;
+
+
+--Find members who have overdue books (borrowed more than 30 days ago, not returned).
+
+
+select m.member_id, m.Name, br.borrow_date, (current_date - br.borrow_date) as No_of_days
+from borrowingrecords br
+join members m on br.member_id = m.member_id
+where return_date is null and (current_date - br.borrow_date) > 30
+order by borrow_date;
+
+
+--Retrieve books by genre along with the count of available copies
+
+--v1 retrieves the genre and with no of books
+
+select genre, count(*) as No_of_Books, sum(available_copies) as Total_copies
+from books 
+group by genre
+order by Total_copies desc, genre;
+
+--v2 one row per genre with total available copies
+SELECT 
+    genre,
+    COUNT(*) AS total_books_in_genre,
+    SUM(available_copies) AS Total_copies,
+    STRING_AGG(Title, ' | ' ORDER BY Title) AS book_titles
+FROM Books 
+GROUP BY genre
+ORDER BY Total_copies DESC, genre;
+
+
+--Find the most borrowed book(s) overall
+
+/*-- Returns all books with the highest borrow count (tie supported) */
+
+with borrow_stats as (
+	select b.title, count(*) as Borrow_count
+	from books b
+	join borrowingrecords br on b.book_id = br.book_id
+	group by b.title 
+)
+
+select * from borrow_stats
+where Borrow_count = (select max(Borrow_count) from borrow_stats);
+
+
+--Retrieve members who have borrowed books from at least three different genres.
+
+select m.member_id, m.Name, count(*) as Borrow_count, 
+		count(distinct b.genre) as Genres_Borrowed,
+		string_agg(b.genre, ' | ' order by b.genre)
+from borrowingrecords br
+join members m on m.member_id = br.member_id
+join books b on b.book_id = br.book_id
+group by m.member_id
+having count(distinct b.genre) >= 3
+order by Genres_Borrowed desc;
+
+
+
+--##################################################
+--Reporting and Analytics:
+--##################################################
+
+
 
 
 
