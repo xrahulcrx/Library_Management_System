@@ -225,7 +225,7 @@ where return_date is null and (current_date - br.borrow_date) > 30
 order by no_of_days desc;
 
 
---Retrieve books by genre along with the count of available copies
+-- c) Retrieve books by genre along with the count of available copies
 
 --v1 retrieves the genre and with no. of books
 
@@ -243,7 +243,7 @@ group by genre
 order by Total_copies desc, genre;
 
 
---Find the most borrowed book(s) overall
+-- d) Find the most borrowed book(s) overall
 /*-- Returns all books with the highest borrow count (tie supported) */
 
 with borrow_stats as (
@@ -257,7 +257,7 @@ select * from borrow_stats
 where Borrow_count = (select max(Borrow_count) from borrow_stats);
 
 
---Retrieve members who have borrowed books from at least three different genres.
+-- e) Retrieve members who have borrowed books from at least three different genres.
 
 select m.member_id, m.Name, count(*) as Borrow_count, 
 		count(distinct b.genre) as Genres_Borrowed,
@@ -274,7 +274,7 @@ order by Genres_Borrowed desc;
 --Reporting and Analytics:
 --##################################################
 
---Calculate the total number of books borrowed per month.
+-- a) Calculate the total number of books borrowed per month.
 
 select date_trunc('month', borrow_date)::date as Months_start,
 		to_char(borrow_date, 'Mon YYYY') as Month_name,  count(*) as Borrow_count
@@ -282,7 +282,7 @@ from borrowingrecords
 group by Months_start, Month_name
 order by Months_start;
 
---Find the top three most active members based on the number of books borrowed.
+-- b) Find the top three most active members based on the number of books borrowed.
 
 select m.member_id, m.name, count(*) as Borrow_count
 from members m
@@ -291,7 +291,7 @@ group by m.member_id, m.name
 order by Borrow_count desc
 limit 3;
 
---Retrieve authors whose books have been borrowed at least 10 times.
+-- c) Retrieve authors whose books have been borrowed at least 10 times.
 
 select b.author, count(*) as Borrow_count
 from borrowingrecords br
@@ -300,7 +300,7 @@ group by b.author
 having count(*) >= 10
 order by Borrow_count desc, b.author;
 
---Identify members who have never borrowed a book.
+-- d) Identify members who have never borrowed a book.
 
 select m.member_id, m.name
 from members m
