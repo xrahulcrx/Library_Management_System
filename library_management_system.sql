@@ -305,7 +305,8 @@ order by Borrow_count desc, b.author;
 select m.member_id, m.name
 from members m
 left join borrowingrecords br on br.member_id = m.member_id
-where br.member_id is null;
+where br.member_id is null
+order by m.member_id;
 
 
 
