@@ -101,8 +101,10 @@ select genre, count(*) as No_of_Books, sum(available_copies) as Total_copies
 from books 
 group by genre
 order by Total_copies desc, genre;
+```
 
---v2 one row per genre with book genre list and total available copies
+### v2 one row per genre with book genre list and total available copies
+```
 select genre, count(*) as total_books_in_genre,
     sum(available_copies) as Total_copies,
     STRING_AGG(Title, ' | ' order by Title) as book_titles
